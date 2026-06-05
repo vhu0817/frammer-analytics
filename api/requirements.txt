@@ -1,0 +1,25 @@
+# core
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+
+# database
+sqlalchemy==2.0.35
+psycopg2-binary==2.9.9      # binary so we don't need pg_config installed
+alembic==1.13.2
+
+# auth
+pyjwt==2.9.0
+bcrypt==4.2.0
+
+# data wrangling + csv exports
+pandas==2.2.3
+
+# config management
+pydantic-settings==2.5.2
+python-dotenv==1.0.1
+
+# gemini sdk for the ATLAS agent
+google-genai==1.14.0
+
+# fastapi needs this for form/file uploads
+python-multipart==0.0.12
