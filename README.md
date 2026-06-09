@@ -45,13 +45,13 @@ Building this step-by-step across 8 phases (47 total steps).
   - Weekday volume bias, enterprise scaling, log-normal durations
   - 85% processing rate, 55% publish rate, 5% intentional data quality issues
 
-### 🔨 Phase 3 — Auth & RBAC (Steps 3.1–3.6) *in progress*
-- [x] Pydantic auth schemas (register, login, token, user response)
-- [x] Auth service (bcrypt hashing, JWT generation/validation)
-- [x] Auth routes (POST /register, POST /login, GET /me)
-- [x] RBAC middleware (JWT extraction, role-based dependencies)
-- [x] Query builder with CTE scoping (tenant isolation by role)
-- [ ] Seed test users and verify auth flow
+### ✅ Phase 3 — Auth & RBAC (Steps 3.1–3.6)
+- Pydantic auth schemas (register, login, token, user response)
+- Auth service (bcrypt hashing, JWT generation/validation)
+- Auth routes (POST /register, POST /login, GET /me)
+- RBAC middleware (JWT extraction, role-based dependencies)
+- Query builder with role-based scoping (tenant isolation)
+- 3 test users seeded + full auth flow verified
 
 ### ⏳ Phase 4 — Dashboard API Endpoints
 - Executive summary KPIs, sparklines, anomaly alerts
