@@ -2,6 +2,8 @@
 
 A full-stack B2B analytics dashboard for **Frammer AI** — a platform that converts long-form videos into shorts, reels, chapters, and summaries. This dashboard tracks video processing pipelines across clients, channels, users, and content types, with role-based access control and an AI-powered natural language query agent.
 
+> This project is based on a problem statement from the **Interhall General Championship 2026** at **Indian Institute of Technology Kharagpur**.
+
 ## What this does
 
 Frammer processes thousands of videos daily for multiple enterprise clients. This analytics OS gives operations teams a way to:
@@ -47,7 +49,7 @@ Building this step-by-step across 8 phases (47 total steps).
 - [x] Pydantic auth schemas (register, login, token, user response)
 - [x] Auth service (bcrypt hashing, JWT generation/validation)
 - [x] Auth routes (POST /register, POST /login, GET /me)
-- [ ] RBAC middleware (JWT extraction, role-based dependencies)
+- [x] RBAC middleware (JWT extraction, role-based dependencies)
 - [ ] Query builder with CTE scoping (tenant isolation by role)
 - [ ] Seed test users and verify auth flow
 
