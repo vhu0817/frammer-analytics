@@ -2,7 +2,7 @@
 
 A full-stack B2B analytics dashboard for **Frammer AI** — a platform that converts long-form videos into shorts, reels, chapters, and summaries. This dashboard tracks video processing pipelines across clients, channels, users, and content types, with role-based access control and an AI-powered natural language query agent.
 
-> This project is based on a problem statement from the **Interhall General Championship 2026** at **Indian Institute of Technology Kharagpur**.
+> This project is based on a problem statement from the **Interhall Technology General Championship Data Analytics 2026** at **Indian Institute of Technology Kharagpur**.
 
 ## What this does
 
