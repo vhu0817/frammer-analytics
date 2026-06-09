@@ -6,6 +6,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.database import engine, Base
 
+# triggers all model imports so Base.metadata knows about every table
+import app.models  # noqa: F401
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
