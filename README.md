@@ -50,7 +50,7 @@ Building this step-by-step across 8 phases (47 total steps).
 - [x] Auth service (bcrypt hashing, JWT generation/validation)
 - [x] Auth routes (POST /register, POST /login, GET /me)
 - [x] RBAC middleware (JWT extraction, role-based dependencies)
-- [ ] Query builder with CTE scoping (tenant isolation by role)
+- [x] Query builder with CTE scoping (tenant isolation by role)
 - [ ] Seed test users and verify auth flow
 
 ### ⏳ Phase 4 — Dashboard API Endpoints
