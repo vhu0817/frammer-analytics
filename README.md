@@ -53,13 +53,13 @@ Building this step-by-step across 8 phases (47 total steps).
 - Query builder with role-based scoping (tenant isolation)
 - 3 test users seeded + full auth flow verified
 
-### ⏳ Phase 4 — Dashboard API Endpoints
-- Executive summary KPIs, sparklines, anomaly alerts
-- Usage & trends time series with granularity toggle
-- Client/channel/user analysis with pivot tables and leaderboards
-- Publishing funnel stages and conversion metrics
-- Video explorer with pagination, search, CSV export
-- Dynamic filter options endpoint
+### ✅ Phase 4 — Dashboard API Endpoints (Steps 4.1–4.6)
+- Filter options endpoint (role-scoped dropdowns for all dimensions)
+- Executive summary KPIs, sparklines, z-score anomaly alerts
+- Usage & trends time series with day/week/month granularity + period comparison
+- Analysis pivot tables, top-N leaderboards, dimension drilldowns
+- Publishing funnel stages, conversion breakdowns, type mix distributions
+- Video explorer with pagination, search, sorting, and CSV export
 
 ### ⏳ Phase 5 — Frontend Foundation
 - Vite + React project with shadcn/ui and Tailwind
