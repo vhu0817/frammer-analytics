@@ -61,13 +61,13 @@ Building this step-by-step across 8 phases (47 total steps).
 - Publishing funnel stages, conversion breakdowns, type mix distributions
 - Video explorer with pagination, search, sorting, and CSV export
 
-### ⏳ Phase 5 — Frontend Foundation
-- Vite + React project with shadcn/ui and Tailwind
-- Dark theme design system with glassmorphism cards
-- Sidebar, header, and dashboard layout components
-- Zustand stores (auth, filters, agent)
-- Axios API client with JWT interceptor
-- Login page and protected routing
+### ✅ Phase 5 — Frontend Foundation (Steps 5.1–5.6)
+- Vite + React 19 with Tailwind CSS v4 + shadcn/ui (Radix + Nova preset)
+- Dark theme design system with oklch tokens, glassmorphism card utilities
+- Collapsible sidebar, frosted-glass header, responsive dashboard layout
+- 3 Zustand stores (auth with JWT persistence, global filters, ATLAS chat)
+- Axios API client with JWT interceptor (auto-attach + 401 redirect)
+- Login page with Framer Motion animation, password toggle, protected routing
 
 ### ⏳ Phase 6 — Dashboard Pages (5 Tabs)
 - Executive Summary — KPI cards, sparklines, donut charts
