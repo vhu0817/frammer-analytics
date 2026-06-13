@@ -5,6 +5,7 @@ import Login from "@/pages/Login";
 import ExecutiveSummary from "@/pages/ExecutiveSummary";
 import UsageTrends from "@/pages/UsageTrends";
 import Analysis from "@/pages/Analysis";
+import PublishingFunnel from "@/pages/PublishingFunnel";
 
 // wrapper that redirects to /login if there's no token
 function ProtectedRoute({ children }) {
@@ -38,7 +39,7 @@ function DashboardContent({ activeTab }) {
     case "analysis":
       return <Analysis />;
     case "funnel":
-      return <PlaceholderPage title="Publishing Funnel" description="Upload → process → publish conversion" />;
+      return <PublishingFunnel />;
     case "explorer":
       return <PlaceholderPage title="Video Explorer" description="Searchable, sortable, exportable video list" />;
     default:
