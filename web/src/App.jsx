@@ -3,6 +3,7 @@ import useAuthStore from "@/stores/authStore";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import Login from "@/pages/Login";
 import ExecutiveSummary from "@/pages/ExecutiveSummary";
+import UsageTrends from "@/pages/UsageTrends";
 
 // wrapper that redirects to /login if there's no token
 function ProtectedRoute({ children }) {
@@ -32,7 +33,7 @@ function DashboardContent({ activeTab }) {
     case "executive":
       return <ExecutiveSummary />;
     case "trends":
-      return <PlaceholderPage title="Usage & Trends" description="Time series with granularity toggle" />;
+      return <UsageTrends />;
     case "analysis":
       return <PlaceholderPage title="Analysis" description="Pivot tables, leaderboards, and drilldowns" />;
     case "funnel":
