@@ -4,6 +4,7 @@ import DashboardLayout from "@/components/layout/DashboardLayout";
 import Login from "@/pages/Login";
 import ExecutiveSummary from "@/pages/ExecutiveSummary";
 import UsageTrends from "@/pages/UsageTrends";
+import Analysis from "@/pages/Analysis";
 
 // wrapper that redirects to /login if there's no token
 function ProtectedRoute({ children }) {
@@ -35,7 +36,7 @@ function DashboardContent({ activeTab }) {
     case "trends":
       return <UsageTrends />;
     case "analysis":
-      return <PlaceholderPage title="Analysis" description="Pivot tables, leaderboards, and drilldowns" />;
+      return <Analysis />;
     case "funnel":
       return <PlaceholderPage title="Publishing Funnel" description="Upload → process → publish conversion" />;
     case "explorer":
