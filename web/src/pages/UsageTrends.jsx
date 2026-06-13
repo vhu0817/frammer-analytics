@@ -56,10 +56,14 @@ export default function UsageTrends() {
   const [channelData, setChannelData] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const params = useFilterStore.getState().toParams();
+  // subscribe to filters so we re-fetch when they change
+  const clientId = useFilterStore((s) => s.clientId);
+  const channelId = useFilterStore((s) => s.channelId);
+  const platformId = useFilterStore((s) => s.platformId);
 
   // fetch time series whenever granularity or metric changes
   useEffect(() => {
+    const params = useFilterStore.getState().toParams();
     const fetchTimeseries = async () => {
       setLoading(true);
       try {
@@ -80,10 +84,11 @@ export default function UsageTrends() {
       }
     };
     fetchTimeseries();
-  }, [granularity, metric]);
+  }, [granularity, metric, clientId, channelId, platformId]);
 
   // fetch channel breakdown once
   useEffect(() => {
+    const params = useFilterStore.getState().toParams();
     const fetchChannels = async () => {
       try {
         const res = await api.get("/api/analysis/pivot", {
@@ -95,7 +100,7 @@ export default function UsageTrends() {
       }
     };
     fetchChannels();
-  }, []);
+  }, [clientId, channelId, platformId]);
 
   // format time series for Recharts
   const tsChartData = timeseries

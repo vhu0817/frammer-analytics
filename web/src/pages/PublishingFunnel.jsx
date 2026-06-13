@@ -50,9 +50,13 @@ export default function PublishingFunnel() {
   const [typeMix, setTypeMix] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const params = useFilterStore.getState().toParams();
+  // subscribe to filters so we re-fetch when they change
+  const clientId = useFilterStore((s) => s.clientId);
+  const channelId = useFilterStore((s) => s.channelId);
+  const platformId = useFilterStore((s) => s.platformId);
 
   useEffect(() => {
+    const params = useFilterStore.getState().toParams();
     const fetchAll = async () => {
       setLoading(true);
       try {
@@ -71,7 +75,7 @@ export default function PublishingFunnel() {
       }
     };
     fetchAll();
-  }, []);
+  }, [clientId, channelId, platformId]);
 
   if (loading || !stages) {
     return <LoadingSkeleton />;

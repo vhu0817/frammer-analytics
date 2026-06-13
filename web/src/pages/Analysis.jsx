@@ -60,10 +60,14 @@ export default function Analysis() {
   const [selectedEntity, setSelectedEntity] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const params = useFilterStore.getState().toParams();
+  // subscribe to filters so we re-fetch when they change
+  const clientId = useFilterStore((s) => s.clientId);
+  const channelId = useFilterStore((s) => s.channelId);
+  const platformId = useFilterStore((s) => s.platformId);
 
   // fetch leaderboard + pivot when dimension/metric changes
   useEffect(() => {
+    const params = useFilterStore.getState().toParams();
     const fetchData = async () => {
       setLoading(true);
       setDrilldown(null);
@@ -86,7 +90,7 @@ export default function Analysis() {
       }
     };
     fetchData();
-  }, [dimension, metric]);
+  }, [dimension, metric, clientId, channelId, platformId]);
 
   // drilldown when entity is selected
   const handleDrilldown = async (name) => {

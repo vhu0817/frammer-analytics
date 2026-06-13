@@ -21,7 +21,7 @@ Frammer processes thousands of videos daily for multiple enterprise clients. Thi
 |-------|------|
 | **Backend** | FastAPI, SQLAlchemy, Alembic, bcrypt, PyJWT |
 | **Database** | PostgreSQL 16 (star schema — 5 dimension tables + 1 fact table) |
-| **Frontend** | React 18, Vite, shadcn/ui, Recharts, Zustand, Framer Motion |
+| **Frontend** | React 19, Vite, Tailwind CSS v4, shadcn/ui, Recharts, Zustand, Framer Motion |
 | **AI Agent** | Google Gemini 2.5 Flash, custom ReAct loop |
 | **Infra** | Docker Compose (3 services: db, api, web) |
 
@@ -69,12 +69,17 @@ Building this step-by-step across 8 phases (47 total steps).
 - Axios API client with JWT interceptor (auto-attach + 401 redirect)
 - Login page with Framer Motion animation, password toggle, protected routing
 
-### ⏳ Phase 6 — Dashboard Pages (5 Tabs)
-- Executive Summary — KPI cards, sparklines, donut charts
-- Usage & Trends — area charts, period comparison overlays
-- Analysis — pivot tables with heatmaps, leaderboard bars
-- Publishing Funnel — funnel visualization, conversion cards
-- Video Explorer — data table with sort, search, export
+### ✅ Phase 6 — Dashboard Pages & Global Filters (Steps 6.1–6.6)
+
+All 5 dashboard tabs are fully implemented with live API data:
+
+- **Executive Summary** — 4 KPI cards with mini sparklines (uploads, processing rate, publish rate, duration), 30-day trend area chart, output type donut chart, z-score anomaly alerts
+- **Usage & Trends** — time series area chart with day/week/month granularity toggle, metric selector (uploaded/processed/published/duration), period-over-period comparison overlay with change %, uploads-by-client horizontal bar chart
+- **Analysis** — dimension selector (client/channel/user/output type), ranked leaderboard with gold/silver/bronze badges, click-to-drilldown panel with 6 KPIs + radar chart, scrollable client × channel pivot table
+- **Publishing Funnel** — 3-stage funnel cards (Uploaded → Processed → Published) with rate badges and drop-off indicators, grouped bar chart (processing % vs publish % per client), input type donut chart, output type horizontal bar chart
+- **Video Explorer** — 10-column data table (7,800+ rows), debounced search, column sorting with chevron indicators, pagination (first/prev/page numbers/next/last), page size selector (25/50/100), status badges (Published/Processed/Pending), CSV export
+
+**Global filter bar** — collapsible filter strip in the header with Client/Channel/Platform dropdowns, active filter badge count, smart channel scoping (channels filter to selected client), reset button. All 5 pages reactively re-fetch data when any filter changes via Zustand subscriptions.
 
 ### ⏳ Phase 7 — ATLAS AI Agent
 - Gemini client with schema-aware system prompt
@@ -120,9 +125,21 @@ docker-compose exec db psql -U frammer -d frammer_analytics -c "\dt"
 docker-compose exec api python -m scripts.simulate_data
 ```
 
+### Default login
+
+| Role | Email | Password |
+|------|-------|----------|
+| Admin | `admin@frammer.com` | `test1234` |
+| Client Admin | `client@techvista.com` | `test1234` |
+| Editor | `editor@mediaflow.com` | `test1234` |
+
 ### API docs
 
 Once the API is running, Swagger UI is at [http://localhost:8000/docs](http://localhost:8000/docs).
+
+### Frontend
+
+The dashboard is at [http://localhost:5173](http://localhost:5173) (Vite dev server).
 
 ## Project structure
 
@@ -142,7 +159,21 @@ frammer-analytics/
 │   ├── alembic/             # database migrations
 │   ├── scripts/             # data simulator
 │   └── requirements.txt
-├── web/                     # React frontend (phase 5+)
+├── web/
+│   └── src/
+│       ├── components/
+│       │   ├── layout/      # DashboardLayout, Header, Sidebar
+│       │   └── ui/          # shadcn/ui primitives (button, etc.)
+│       ├── pages/
+│       │   ├── Login.jsx
+│       │   ├── ExecutiveSummary.jsx
+│       │   ├── UsageTrends.jsx
+│       │   ├── Analysis.jsx
+│       │   ├── PublishingFunnel.jsx
+│       │   └── VideoExplorer.jsx
+│       ├── stores/          # Zustand (auth, filters, atlas)
+│       ├── lib/             # Axios client, utils
+│       └── App.jsx          # routing + tab switch
 ├── docs/                    # documentation (phase 8)
 ├── docker-compose.yml
 └── .env.example
