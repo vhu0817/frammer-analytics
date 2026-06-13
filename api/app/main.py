@@ -34,6 +34,7 @@ app.add_middleware(
     allow_origins=[
         settings.vite_api_url,  # http://localhost:5173 or wherever the frontend is
         "http://localhost:5173",  # vite's default port, just in case
+        settings.frontend_url, # production Vercel URL
     ],
     allow_credentials=True,
     allow_methods=["*"],

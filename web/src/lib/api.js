@@ -5,7 +5,7 @@ const api = axios.create({
   // in Docker: vite proxies /api → http://api:8000
   // locally: vite proxies /api → http://localhost:8000
   // either way, we just use relative URLs here
-  baseURL: "",
+  baseURL: import.meta.env.VITE_API_URL || "",
   headers: { "Content-Type": "application/json" },
 });
 

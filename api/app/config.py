@@ -24,6 +24,7 @@ class Settings(BaseSettings):
 
     # frontend url for CORS — we'll allow this origin in main.py
     vite_api_url: str = "http://localhost:8000"
+    frontend_url: str = "http://localhost:5173"
 
     model_config = SettingsConfigDict(
         env_file=".env",
