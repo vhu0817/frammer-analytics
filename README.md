@@ -129,9 +129,9 @@ docker-compose exec api python -m scripts.simulate_data
 
 | Role | Email | Password |
 |------|-------|----------|
-| Admin | `admin@frammer.com` | `test1234` |
-| Client Admin | `client@techvista.com` | `test1234` |
-| Editor | `editor@mediaflow.com` | `test1234` |
+| Admin | `admin@techvistacorp.com` | `password123` |
+| Client Admin | `sarah.chen@techvistacorp.com` | `password123` |
+| Regular User | `mike.johnson@techvistacorp.com` | `password123` |
 
 ### API docs
 
@@ -140,6 +140,20 @@ Once the API is running, Swagger UI is at [http://localhost:8000/docs](http://lo
 ### Frontend
 
 The dashboard is at [http://localhost:5173](http://localhost:5173) (Vite dev server).
+
+## Deployment
+
+This project is fully deployed using a modern decoupled architecture:
+
+- **Frontend (Vite + React)**: Deployed globally on [Vercel](https://vercel.com).
+- **Backend (FastAPI)**: Deployed as a Docker Web Service on [Render](https://render.com).
+- **Database (PostgreSQL)**: Managed PostgreSQL instance on [Render](https://render.com).
+
+To deploy your own instance:
+1. Create a free PostgreSQL database on Render.
+2. Deploy the `api` folder as a Docker Web Service on Render, attached to the database.
+3. Deploy the `web` folder on Vercel, with `VITE_API_URL` pointing to your Render API.
+4. Set the `FRONTEND_URL` on Render to your Vercel domain to allow CORS.
 
 ## Project structure
 
