@@ -79,7 +79,7 @@ export default function Login() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@frammer.com"
+              placeholder="admin@techvistacorp.com"
               className="w-full rounded-lg border border-input bg-input/30 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/30 transition-colors"
             />
           </div>
@@ -127,11 +127,11 @@ export default function Login() {
 
         {/* test accounts hint */}
         <div className="mt-6 rounded-lg bg-muted/50 p-3">
-          <p className="text-xs font-medium text-muted-foreground mb-2">Test accounts:</p>
+          <p className="text-xs font-medium text-muted-foreground mb-2">Test accounts (password: password123):</p>
           <div className="space-y-1 text-xs text-muted-foreground/80">
-            <p><span className="text-foreground/70">admin@frammer.com</span> · test1234 · Full access</p>
-            <p><span className="text-foreground/70">client@frammer.com</span> · test1234 · Client only</p>
-            <p><span className="text-foreground/70">editor@frammer.com</span> · test1234 · Single user</p>
+            <p><span className="text-foreground/70">admin@techvistacorp.com</span> · Platform Admin</p>
+            <p><span className="text-foreground/70">sarah.chen@techvistacorp.com</span> · Client Admin</p>
+            <p><span className="text-foreground/70">mike.johnson@techvistacorp.com</span> · Regular User</p>
           </div>
         </div>
       </motion.div>
