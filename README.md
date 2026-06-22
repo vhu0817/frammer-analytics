@@ -27,7 +27,7 @@ Frammer processes thousands of videos daily for multiple enterprise clients. Thi
 
 ## Current progress
 
-Building this step-by-step across 8 phases (47 total steps).
+Building this step-by-step across 8 phases (47 total steps). **7 of 8 phases complete.**
 
 ### ✅ Phase 1 — Scaffolding & Infrastructure (Steps 1.1–1.10)
 - Monorepo folder structure (`api/`, `web/`, `docs/`)
@@ -81,12 +81,22 @@ All 5 dashboard tabs are fully implemented with live API data:
 
 **Global filter bar** — collapsible filter strip in the header with Client/Channel/Platform dropdowns, active filter badge count, smart channel scoping (channels filter to selected client), reset button. All 5 pages reactively re-fetch data when any filter changes via Zustand subscriptions.
 
-### ⏳ Phase 7 — ATLAS AI Agent
-- Gemini client with schema-aware system prompt
-- Intent classifier (conversational vs analytics)
-- 5 tools: execute_query, build_chart, get_schema, get_metric_definitions, answer
-- ReAct reasoning loop (think → act → observe → repeat)
-- Chat UI with dynamic chart rendering
+### ✅ Phase 7 — ATLAS AI Agent (Steps 7.1–7.6)
+
+The **ATLAS** (Analytics & Trends Language Agent System) is an AI-powered natural language interface that lets users query video analytics data by asking questions in plain English.
+
+**Backend (6 modules in `api/app/agent/`):**
+- **Gemini client** — wraps the `google-genai` SDK with schema-aware system prompt (Gemini 2.5 Flash)
+- **Intent classifier** — hybrid regex classifier routes queries as `conversational` (greetings, meta-questions) vs `analytics` (data questions needing SQL)
+- **5 tools** — `execute_query` (read-only SQL with validation + timeout + row cap), `build_chart` (Recharts config JSON), `get_schema`, `get_metric_definitions`, `answer` (terminates loop)
+- **ReAct reasoning loop** — Think → Act → Observe cycle with max 5 iterations, tool call parsing via regex, conversation history management, context window protection (8KB truncation)
+- **API endpoint** — `POST /api/agent/query` with JWT auth, Pydantic request/response schemas, timing instrumentation
+- **SQL safety** — 4-layer defense: keyword blocking, statement timeout (10s), auto-LIMIT (100 rows), comment stripping
+
+**Frontend (3 components in `web/src/components/agent/`):**
+- **AtlasChat** — slide-out right panel with Framer Motion animation, message history with auto-scroll, animated thinking dots, suggested starter queries
+- **ChatMessage** — user/agent message bubbles with inline markdown rendering (bold, code, tables, lists, headers) — no react-markdown dependency
+- **AgentChart** — dynamic Recharts renderer that maps agent chart configs to bar, line, area, pie, donut, and radar charts
 
 ### ⏳ Phase 8 — Polish & Documentation
 - Error boundaries, skeleton screens, toast notifications
@@ -163,10 +173,18 @@ frammer-analytics/
 │   ├── app/
 │   │   ├── models/          # SQLAlchemy ORM (star schema)
 │   │   ├── routes/          # FastAPI route modules
+│   │   │   └── agent.py     # POST /api/agent/query
 │   │   ├── schemas/         # Pydantic request/response models
+│   │   │   ├── auth.py
+│   │   │   └── agent.py     # AgentQueryRequest/Response
 │   │   ├── services/        # business logic (auth, queries)
 │   │   ├── middleware/       # RBAC, JWT extraction
-│   │   ├── agent/           # ATLAS AI agent (phase 7)
+│   │   ├── agent/           # ATLAS AI agent
+│   │   │   ├── gemini_client.py    # Gemini SDK wrapper
+│   │   │   ├── system_prompt.py    # Schema-aware system prompt
+│   │   │   ├── intent_classifier.py # Conversational vs analytics
+│   │   │   ├── tools.py            # 5 agent tools
+│   │   │   └── react_loop.py       # ReAct reasoning loop
 │   │   ├── config.py        # pydantic-settings
 │   │   ├── database.py      # SQLAlchemy engine + session
 │   │   └── main.py          # FastAPI app entry point
@@ -176,7 +194,12 @@ frammer-analytics/
 ├── web/
 │   └── src/
 │       ├── components/
+│       │   ├── agent/       # ATLAS chat UI
+│       │   │   ├── AtlasChat.jsx     # slide-out chat panel
+│       │   │   ├── ChatMessage.jsx   # message bubbles + markdown
+│       │   │   └── AgentChart.jsx    # dynamic Recharts renderer
 │       │   ├── layout/      # DashboardLayout, Header, Sidebar
+│       │   ├── filters/     # global filter dropdowns
 │       │   └── ui/          # shadcn/ui primitives (button, etc.)
 │       ├── pages/
 │       │   ├── Login.jsx
