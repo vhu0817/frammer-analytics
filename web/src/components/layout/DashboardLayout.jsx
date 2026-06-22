@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
+import AtlasChat from "@/components/agent/AtlasChat";
 
 export default function DashboardLayout({ children, user, onLogout }) {
   const navigate = useNavigate();
@@ -48,6 +49,9 @@ export default function DashboardLayout({ children, user, onLogout }) {
           {typeof children === "function" ? children(activeTab) : children}
         </div>
       </main>
+
+      {/* ATLAS AI chat panel — slides in from the right */}
+      <AtlasChat isOpen={atlasOpen} onClose={() => setAtlasOpen(false)} />
     </div>
   );
 }
