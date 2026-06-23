@@ -147,10 +147,16 @@ def run_agent(
     if intent == Intent.CONVERSATIONAL:
         try:
             response_text = chat_completion(client, messages, temperature=0.7)
-            # strip any accidental tool calls from conversational responses
-            clean_text = _extract_text_before_tool_call(response_text)
-            if not clean_text:
-                clean_text = response_text
+            # Gemini may still wrap conversational responses in a tool_call block
+            # (because the system prompt instructs it to use tools).
+            # Try to extract the answer from a tool_call first.
+            tool_call = _parse_tool_call(response_text)
+            if tool_call and tool_call["tool"] == "answer":
+                clean_text = tool_call["args"].get("text", response_text)
+            else:
+                clean_text = _extract_text_before_tool_call(response_text)
+                if not clean_text:
+                    clean_text = response_text
             return AgentResponse(answer=clean_text, iterations=0)
         except Exception as e:
             logger.error(f"Gemini error (conversational): {e}")
