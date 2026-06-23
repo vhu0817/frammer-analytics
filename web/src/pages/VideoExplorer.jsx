@@ -202,7 +202,7 @@ export default function VideoExplorer() {
       ) : (
         <motion.div {...fadeUp} transition={{ delay: 0.15 }} className="glass-card flex flex-col flex-1 min-h-0 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full min-w-[800px] text-sm">
             <thead>
               <tr className="border-b border-border bg-muted/10">
                 {COLUMNS.map((col) => (

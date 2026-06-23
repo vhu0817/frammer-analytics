@@ -155,7 +155,7 @@ export default function Analysis() {
             Leaderboards, pivot tables, and entity drilldowns
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {/* dimension selector */}
           <div className="flex rounded-lg border border-border bg-muted/30 p-0.5">
             {DIMENSIONS.map((d) => (

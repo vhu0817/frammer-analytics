@@ -110,7 +110,7 @@ export default function AtlasChat({ isOpen, onClose }) {
 
           {/* chat panel */}
           <motion.div
-            className="fixed right-0 top-0 z-50 flex h-screen w-full max-w-md flex-col border-l border-border bg-background shadow-2xl"
+            className="fixed right-0 top-0 z-50 flex h-screen w-full flex-col border-l border-border bg-background shadow-2xl sm:max-w-md"
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}

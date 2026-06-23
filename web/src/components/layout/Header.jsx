@@ -47,13 +47,16 @@ export default function Header({ user, onLogout, sidebarCollapsed, filtersOpen, 
     <>
       <header
         className={cn(
-          "fixed top-0 right-0 z-30 flex h-14 items-center justify-between border-b border-border bg-background/80 backdrop-blur-md px-6 transition-all duration-300",
-          sidebarCollapsed ? "left-16" : "left-56"
+          "fixed top-0 right-0 z-30 flex h-14 items-center justify-between border-b border-border bg-background/80 backdrop-blur-md px-4 md:px-6 transition-all duration-300",
+          // on mobile: full width (sidebar is overlay), leave room for hamburger
+          "left-0",
+          // on desktop: offset by sidebar width
+          sidebarCollapsed ? "md:left-16" : "md:left-56"
         )}
       >
         {/* left: page context + filter toggle */}
-        <div className="flex items-center gap-3">
-          <h2 className="text-sm font-medium text-muted-foreground">
+        <div className="flex items-center gap-3 ml-10 md:ml-0">
+          <h2 className="text-sm font-medium text-muted-foreground hidden sm:block">
             Dashboard
           </h2>
 
@@ -79,7 +82,7 @@ export default function Header({ user, onLogout, sidebarCollapsed, filtersOpen, 
         </div>
 
         {/* right: user info */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 md:gap-3">
           {/* role badge */}
           <span className={cn("rounded-md px-2 py-0.5 text-xs font-medium", badge.className)}>
             {badge.label}
@@ -90,7 +93,7 @@ export default function Header({ user, onLogout, sidebarCollapsed, filtersOpen, 
             <div className="flex size-7 items-center justify-center rounded-full bg-muted">
               <User className="size-3.5 text-muted-foreground" />
             </div>
-            <span className="hidden text-sm text-foreground sm:inline-block">
+            <span className="hidden text-sm text-foreground lg:inline-block">
               {user?.email || "user@frammer.com"}
             </span>
           </div>
@@ -111,11 +114,16 @@ export default function Header({ user, onLogout, sidebarCollapsed, filtersOpen, 
       <div
         className={cn(
           "fixed right-0 z-20 border-b border-border bg-background/95 backdrop-blur-md overflow-hidden transition-all duration-300",
-          sidebarCollapsed ? "left-16" : "left-56",
-          filtersOpen ? "top-14 h-12 opacity-100" : "top-14 h-0 opacity-0"
+          "left-0",
+          sidebarCollapsed ? "md:left-16" : "md:left-56",
+          filtersOpen ? "top-14 opacity-100" : "top-14 h-0 opacity-0"
         )}
       >
-        <div className="flex items-center gap-3 px-6 h-12">
+        {/* responsive filter layout: stack vertically on mobile, horizontal on desktop */}
+        <div className={cn(
+          "flex items-center gap-3 px-4 md:px-6",
+          filtersOpen ? "py-2 md:h-12 md:py-0 flex-wrap md:flex-nowrap" : ""
+        )}>
           {/* client filter */}
           <FilterSelect
             id="filter-client"
@@ -184,7 +192,7 @@ function FilterSelect({ id, label, value, onChange, options }) {
         value={value}
         onChange={(e) => onChange(e.target.value ? Number(e.target.value) : null)}
         className={cn(
-          "rounded-md border border-border bg-muted/30 px-2 py-1 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-ring/30 max-w-[160px] transition-colors",
+          "rounded-md border border-border bg-muted/30 px-2 py-1 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-ring/30 max-w-[140px] md:max-w-[160px] transition-colors",
           value ? "text-foreground" : "text-muted-foreground"
         )}
       >

@@ -26,6 +26,8 @@ export default function DashboardLayout({ children, user, onLogout }) {
         activeTab={activeTab}
         onTabChange={handleTabChange}
         onAtlasToggle={handleAtlasToggle}
+        collapsed={sidebarCollapsed}
+        onCollapsedChange={setSidebarCollapsed}
       />
 
       <Header
@@ -37,14 +39,18 @@ export default function DashboardLayout({ children, user, onLogout }) {
       />
 
       {/* main content area — pushes down when filter bar is open */}
+      {/* on mobile: no left padding (sidebar is an overlay), just top padding for header */}
       <main
         className={cn(
           "transition-all duration-300",
-          sidebarCollapsed ? "pl-16" : "pl-56",
+          // desktop sidebar padding
+          sidebarCollapsed ? "md:pl-16" : "md:pl-56",
+          // mobile: no sidebar padding, but add left padding for hamburger
+          "pl-0",
           filtersOpen ? "pt-[7.5rem]" : "pt-14"
         )}
       >
-        <div className="p-6">
+        <div className="p-4 md:p-6">
           {/* support both render-prop and regular children */}
           {typeof children === "function" ? children(activeTab) : children}
         </div>
