@@ -8,6 +8,7 @@ import {
 import { cn } from "@/lib/utils";
 import api from "@/lib/api";
 import useFilterStore from "@/stores/filterStore";
+import { toast } from "@/components/ui/Toast";
 
 const PAGE_SIZES = [25, 50, 100];
 
@@ -40,6 +41,7 @@ export default function VideoExplorer() {
   const [sortBy, setSortBy] = useState("uploaded_at");
   const [sortDir, setSortDir] = useState("desc");
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [exporting, setExporting] = useState(false);
 
   // subscribe to filters so we re-fetch when they change
@@ -78,7 +80,9 @@ export default function VideoExplorer() {
         setTotal(res.data.total);
         setTotalPages(res.data.total_pages);
       } catch (err) {
-        console.error("Failed to load videos", err);
+        const msg = err?.response?.data?.detail || "Failed to load videos";
+        setError(msg);
+        toast.error(msg);
       } finally {
         setLoading(false);
       }
@@ -114,10 +118,9 @@ export default function VideoExplorer() {
       link.download = `frammer_export_${new Date().toISOString().slice(0, 10)}.csv`;
       document.body.appendChild(link);
       link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
+      link.parentNode.removeChild(link);
     } catch (err) {
-      console.error("Export failed", err);
+      toast.error("Failed to export videos");
     } finally {
       setExporting(false);
     }
@@ -191,8 +194,13 @@ export default function VideoExplorer() {
         </div>
       </motion.div>
 
-      {/* data table */}
-      <motion.div {...fadeUp} transition={{ delay: 0.15 }} className="glass-card overflow-hidden">
+      {error && videos.length === 0 ? (
+        <div className="flex flex-col items-center justify-center min-h-[50vh] gap-3 text-center">
+          <p className="text-sm text-muted-foreground">Could not load videos.</p>
+          <button onClick={() => { setError(null); setLoading(true); }} className="text-xs text-primary hover:underline">Retry</button>
+        </div>
+      ) : (
+        <motion.div {...fadeUp} transition={{ delay: 0.15 }} className="glass-card flex flex-col flex-1 min-h-0 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -353,6 +361,7 @@ export default function VideoExplorer() {
           </div>
         )}
       </motion.div>
+      )}
     </div>
   );
 }

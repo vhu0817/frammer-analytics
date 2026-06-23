@@ -12,6 +12,8 @@ import {
 import { cn } from "@/lib/utils";
 import api from "@/lib/api";
 import useFilterStore from "@/stores/filterStore";
+import { toast } from "@/components/ui/Toast";
+import { SkeletonPage } from "@/components/ui/Skeleton";
 
 const DIMENSIONS = [
   { value: "client", label: "Client", icon: Users },
@@ -59,6 +61,7 @@ export default function Analysis() {
   const [drilldown, setDrilldown] = useState(null);
   const [selectedEntity, setSelectedEntity] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // subscribe to filters so we re-fetch when they change
   const clientId = useFilterStore((s) => s.clientId);
@@ -84,7 +87,9 @@ export default function Analysis() {
         setLeaderboard(lbRes.data);
         setPivot(pivotRes.data);
       } catch (err) {
-        console.error("Failed to load analysis", err);
+        const msg = err?.response?.data?.detail || "Failed to load analysis";
+        setError(msg);
+        toast.error(msg);
       } finally {
         setLoading(false);
       }
@@ -106,12 +111,24 @@ export default function Analysis() {
       });
       setDrilldown(res.data);
     } catch (err) {
-      console.error("Drilldown failed", err);
+      toast.error("Drilldown failed");
     }
   };
 
   // find max value for progress bars
   const maxVal = leaderboard?.entries?.[0]?.value || 1;
+
+  if (loading || !leaderboard || !pivot) {
+    return <SkeletonPage />;
+  }
+  if (error && (!leaderboard || !pivot)) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[50vh] gap-3 text-center">
+        <p className="text-sm text-muted-foreground">Could not load analysis data.</p>
+        <button onClick={() => { setError(null); setLoading(true); }} className="text-xs text-primary hover:underline">Retry</button>
+      </div>
+    );
+  }
 
   // build radar data from the drilldown
   const radarData = drilldown

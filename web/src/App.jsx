@@ -1,6 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import useAuthStore from "@/stores/authStore";
 import DashboardLayout from "@/components/layout/DashboardLayout";
+import ErrorBoundary from "@/components/ui/ErrorBoundary";
+import { ToastContainer } from "@/components/ui/Toast";
 import Login from "@/pages/Login";
 import ExecutiveSummary from "@/pages/ExecutiveSummary";
 import UsageTrends from "@/pages/UsageTrends";
@@ -18,20 +20,22 @@ function ProtectedRoute({ children }) {
 
 
 // routes each sidebar tab to the right page
+// each page is wrapped in its own ErrorBoundary so one crash
+// doesn't affect the rest of the dashboard
 function DashboardContent({ activeTab }) {
   switch (activeTab) {
     case "executive":
-      return <ExecutiveSummary />;
+      return <ErrorBoundary key="executive"><ExecutiveSummary /></ErrorBoundary>;
     case "trends":
-      return <UsageTrends />;
+      return <ErrorBoundary key="trends"><UsageTrends /></ErrorBoundary>;
     case "analysis":
-      return <Analysis />;
+      return <ErrorBoundary key="analysis"><Analysis /></ErrorBoundary>;
     case "funnel":
-      return <PublishingFunnel />;
+      return <ErrorBoundary key="funnel"><PublishingFunnel /></ErrorBoundary>;
     case "explorer":
-      return <VideoExplorer />;
+      return <ErrorBoundary key="explorer"><VideoExplorer /></ErrorBoundary>;
     default:
-      return <ExecutiveSummary />;
+      return <ErrorBoundary key="executive"><ExecutiveSummary /></ErrorBoundary>;
   }
 }
 
@@ -54,6 +58,7 @@ export default function App() {
           }
         />
       </Routes>
+      <ToastContainer />
     </BrowserRouter>
   );
 }

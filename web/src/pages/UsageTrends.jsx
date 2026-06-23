@@ -9,6 +9,8 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import api from "@/lib/api";
 import useFilterStore from "@/stores/filterStore";
+import { toast } from "@/components/ui/Toast";
+import { SkeletonPage } from "@/components/ui/Skeleton";
 
 const GRANULARITIES = [
   { value: "day", label: "Daily" },
@@ -55,6 +57,7 @@ export default function UsageTrends() {
   const [comparison, setComparison] = useState(null);
   const [channelData, setChannelData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // subscribe to filters so we re-fetch when they change
   const clientId = useFilterStore((s) => s.clientId);
@@ -78,7 +81,9 @@ export default function UsageTrends() {
         setTimeseries(tsRes.data);
         setComparison(compRes.data);
       } catch (err) {
-        console.error("Failed to load trends", err);
+        const msg = err?.response?.data?.detail || "Failed to load trends";
+        setError(msg);
+        toast.error(msg);
       } finally {
         setLoading(false);
       }
@@ -96,7 +101,7 @@ export default function UsageTrends() {
         });
         setChannelData(res.data);
       } catch (err) {
-        console.error("Failed to load channel data", err);
+        toast.error("Failed to load channel data");
       }
     };
     fetchChannels();
@@ -123,6 +128,18 @@ export default function UsageTrends() {
   const clientBarData = channelData
     ? buildClientBarData(channelData)
     : [];
+
+  if (loading || !timeseries) {
+    return <SkeletonPage />;
+  }
+  if (error && !timeseries) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[50vh] gap-3 text-center">
+        <p className="text-sm text-muted-foreground">Could not load trends data.</p>
+        <button onClick={() => { setError(null); setLoading(true); }} className="text-xs text-primary hover:underline">Retry</button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -175,9 +192,6 @@ export default function UsageTrends() {
           <h3 className="text-sm font-medium text-foreground">
             {METRICS.find((m) => m.value === metric)?.label} — {GRANULARITIES.find((g) => g.value === granularity)?.label}
           </h3>
-          {loading && (
-            <span className="text-xs text-muted-foreground animate-pulse">Loading…</span>
-          )}
         </div>
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">

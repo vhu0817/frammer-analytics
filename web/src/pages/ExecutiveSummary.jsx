@@ -10,6 +10,8 @@ import {
 } from "lucide-react";
 import api from "@/lib/api";
 import useFilterStore from "@/stores/filterStore";
+import { toast } from "@/components/ui/Toast";
+import { SkeletonPage } from "@/components/ui/Skeleton";
 
 // our chart color palette from the CSS tokens — mapped to oklch values
 const CHART_COLORS = [
@@ -33,6 +35,7 @@ export default function ExecutiveSummary() {
   const [alerts, setAlerts] = useState(null);
   const [typeMix, setTypeMix] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // subscribe to filters so we re-fetch when they change
   const clientId = useFilterStore((s) => s.clientId);
@@ -55,7 +58,9 @@ export default function ExecutiveSummary() {
         setAlerts(alertRes.data);
         setTypeMix(typeRes.data);
       } catch (err) {
-        console.error("Failed to load executive data", err);
+        const msg = err?.response?.data?.detail || "Failed to load dashboard data";
+        setError(msg);
+        toast.error(msg);
       } finally {
         setLoading(false);
       }
@@ -63,8 +68,14 @@ export default function ExecutiveSummary() {
     fetchAll();
   }, [clientId, channelId, platformId]);
 
-  if (loading || !kpis) {
-    return <LoadingSkeleton />;
+  if (loading || !kpis) return <SkeletonPage />;
+  if (error && !kpis) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[50vh] gap-3 text-center">
+        <p className="text-sm text-muted-foreground">Could not load dashboard data.</p>
+        <button onClick={() => { setError(null); setLoading(true); }} className="text-xs text-primary hover:underline">Retry</button>
+      </div>
+    );
   }
 
   // transform sparkline data into the format Recharts wants
@@ -327,31 +338,6 @@ export default function ExecutiveSummary() {
           </p>
         </motion.div>
       )}
-    </div>
-  );
-}
-
-// skeleton loading state
-function LoadingSkeleton() {
-  return (
-    <div className="space-y-6">
-      <div>
-        <div className="h-7 w-48 bg-muted/50 rounded animate-pulse" />
-        <div className="h-4 w-72 bg-muted/30 rounded animate-pulse mt-2" />
-      </div>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="glass-card p-5 space-y-3">
-            <div className="h-3 w-24 bg-muted/50 rounded animate-pulse" />
-            <div className="h-8 w-32 bg-muted/40 rounded animate-pulse" />
-            <div className="h-10 w-full bg-muted/20 rounded animate-pulse" />
-          </div>
-        ))}
-      </div>
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <div className="glass-card p-6 lg:col-span-2 h-72 animate-pulse bg-muted/10" />
-        <div className="glass-card p-6 h-72 animate-pulse bg-muted/10" />
-      </div>
     </div>
   );
 }
