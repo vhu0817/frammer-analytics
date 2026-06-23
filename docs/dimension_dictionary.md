@@ -1,157 +1,122 @@
 # Dimension Dictionary
 
-All dimension tables in the Frammer Analytics star schema, their attributes, hierarchies, and relationships.
+> This doc describes the five dimension tables that make up the "arms" of our star schema. If you're onboarding to the codebase or trying to understand what a filter dropdown actually maps to, start here.
+
+Each dimension is a small lookup table that fact_videos references via a foreign key. When a user picks "TechVista Corp" from the Client dropdown on the dashboard, we're filtering `fact_videos.client_id` to match `dim_client.client_id = 1`.
 
 ---
 
-## dim_client
+## Clients (`dim_client`)
 
-Represents enterprise customers who use the Frammer platform.
+Every company that pays for Frammer is a "client." We currently have 8 of them, ranging from enterprise shops processing thousands of videos to small startups doing a few dozen a week.
 
-| Column | Type | Nullable | Description |
-|--------|------|----------|-------------|
-| `client_id` | INTEGER (PK) | No | Auto-incremented unique identifier |
-| `client_name` | VARCHAR(100) | No | Company name (unique) |
-| `client_segment` | VARCHAR(50) | No | Business tier: `enterprise`, `mid-market`, `startup` |
-| `region` | VARCHAR(50) | No | Geographic region: `North America`, `Europe`, `Asia Pacific`, `Latin America` |
+| Column | Type | What it is |
+|--------|------|------------|
+| `client_id` | int (PK) | Auto-incremented ID |
+| `client_name` | varchar(100) | Company name, must be unique |
+| `client_segment` | varchar(50) | One of: `enterprise`, `mid-market`, `startup` |
+| `region` | varchar(50) | Where they're based geographically |
 
-### Hierarchy
-```
-region → client_segment → client_name
-```
+The segment and region fields are mostly used for grouping in the Analysis page — you can pivot by client and see which segments produce the most content.
 
-### Sample Data
-| client_name | segment | region |
-|------------|---------|--------|
+**Current clients:**
+
+| Name | Segment | Region |
+|------|---------|--------|
 | TechVista Corp | enterprise | North America |
 | MediaFlow Global | enterprise | Europe |
 | ContentScale Inc | mid-market | North America |
 | CloudCut Digital | mid-market | Asia Pacific |
 | PixelWave Media | startup | North America |
+| BrightReel Studios | mid-market | Europe |
+| IndiCreate | startup | Asia Pacific |
+| ReelForge | startup | Latin America |
 
-### Relationships
-- **One-to-many** → `dim_channel` (a client owns multiple channels)
-- **One-to-many** → `dim_user` (a client has multiple users)
-- **One-to-many** → `fact_videos` (a client's videos)
-
----
-
-## dim_channel
-
-Represents content channels within a client organization. Think YouTube channels, podcast feeds, or internal content streams.
-
-| Column | Type | Nullable | Description |
-|--------|------|----------|-------------|
-| `channel_id` | INTEGER (PK) | No | Auto-incremented unique identifier |
-| `client_id` | INTEGER (FK) | No | Parent client |
-| `channel_name` | VARCHAR(150) | No | Channel display name |
-| `workspace` | VARCHAR(100) | No | Team/department that owns this channel |
-| `language` | VARCHAR(50) | No | Primary content language |
-
-### Hierarchy
-```
-client → workspace → channel_name
-```
-
-### Languages
-`English`, `Spanish`, `French`, `German`, `Japanese`, `Portuguese`, `Hindi`
-
-### Relationships
-- **Many-to-one** → `dim_client` (a channel belongs to one client)
-- **One-to-many** → `fact_videos` (a channel contains multiple videos)
+A client can have multiple channels and multiple users — it's the top of the hierarchy.
 
 ---
 
-## dim_user
+## Channels (`dim_channel`)
 
-Represents individual users who upload and manage videos on the platform.
+A channel is basically a content stream within a client. Think of it like a YouTube channel — "BrightReel BTS," "CloudCut EN," "TechVista Corp Tutorials." Each client has 3-4 channels on average.
 
-| Column | Type | Nullable | Description |
-|--------|------|----------|-------------|
-| `user_id` | INTEGER (PK) | No | Auto-incremented unique identifier |
-| `client_id` | INTEGER (FK) | No | Parent client |
-| `username` | VARCHAR(100) | No | Display name |
-| `email` | VARCHAR(150) | No | Login email (unique) |
-| `team_name` | VARCHAR(100) | No | Team within the client org |
-| `role` | VARCHAR(30) | No | Access level: `website_admin`, `client_admin`, `user` |
-| `password_hash` | VARCHAR(255) | No | bcrypt-hashed password |
+| Column | Type | What it is |
+|--------|------|------------|
+| `channel_id` | int (PK) | Auto-incremented ID |
+| `client_id` | int (FK → dim_client) | Which client owns this channel |
+| `channel_name` | varchar(150) | Display name |
+| `workspace` | varchar(100) | The team/department (e.g., "Marketing," "Product") |
+| `language` | varchar(50) | Primary language: English, Spanish, French, German, Japanese, Portuguese, Hindi |
 
-### Roles & Permissions
-
-| Role | Can See | Description |
-|------|---------|-------------|
-| `website_admin` | All data | Platform operator, sees all clients |
-| `client_admin` | Own client's data | Client-level manager |
-| `user` | Own uploads only | Individual content creator |
-
-### Hierarchy
-```
-role → client → team_name → username
-```
-
-### Relationships
-- **Many-to-one** → `dim_client` (a user belongs to one client)
-- **One-to-many** → `fact_videos` (a user uploads multiple videos)
+One important frontend behavior: when you select a client in the global filter bar, the channel dropdown automatically scopes to only show that client's channels. This happens client-side by filtering the channel list where `channel.client_id === selectedClientId`.
 
 ---
 
-## dim_type
+## Users (`dim_user`)
 
-Represents the content transformation pipeline — what goes in (input) and what comes out (output).
+These are the people who actually log in and upload videos. They're also the entities that our RBAC system controls access for.
 
-| Column | Type | Nullable | Description |
-|--------|------|----------|-------------|
-| `type_id` | INTEGER (PK) | No | Auto-incremented unique identifier |
-| `input_type` | VARCHAR(80) | No | Source content format |
-| `output_type` | VARCHAR(80) | No | Generated content format |
+| Column | Type | What it is |
+|--------|------|------------|
+| `user_id` | int (PK) | Auto-incremented ID |
+| `client_id` | int (FK → dim_client) | Which client they belong to |
+| `username` | varchar(100) | Display name (e.g., "Sarah Chen") |
+| `email` | varchar(150) | Login email, unique across the system |
+| `team_name` | varchar(100) | Their team within the client org |
+| `role` | varchar(30) | Access level (see below) |
+| `password_hash` | varchar(255) | bcrypt hash, never returned by the API |
 
-### Input Types
-`Webinar`, `Podcast`, `Interview`, `Presentation`, `Meeting Recording`, `Tutorial`, `Lecture`, `Panel Discussion`, `Product Demo`
+**Roles and what they can see:**
 
-### Output Types
-`Short Clip`, `Highlights Reel`, `Chapter`, `Summary`, `Quote Card`, `Tutorial`, `Trailer`
+| Role | Data Scope | Use Case |
+|------|-----------|----------|
+| `website_admin` | Everything, all clients | Us (the platform operators) |
+| `client_admin` | Only their own client's data | Client-side managers |
+| `user` | Only videos they personally uploaded | Individual content creators |
 
-### Hierarchy
-```
-input_type → output_type
-```
-
-### Relationships
-- **One-to-many** → `fact_videos` (a type combination is used by many videos)
-
----
-
-## dim_platform
-
-Represents publishing destinations where processed videos are distributed.
-
-| Column | Type | Nullable | Description |
-|--------|------|----------|-------------|
-| `platform_id` | INTEGER (PK) | No | Auto-incremented unique identifier |
-| `platform_name` | VARCHAR(80) | No | Platform name (unique) |
-
-### Available Platforms
-`YouTube`, `Instagram`, `TikTok`, `LinkedIn`, `Twitter/X`
-
-### Relationships
-- **One-to-many** → `fact_videos` (a platform receives many published videos)
-
-> **Note:** `platform_id` in `fact_videos` is **nullable**. A NULL platform means the video has not been published yet.
+This scoping happens in `query_builder.py` — every dashboard query starts with `scoped_query(db, user)` which automatically applies the right `WHERE` clause based on the logged-in user's role.
 
 ---
 
-## Dimension Cross-References
+## Content Types (`dim_type`)
 
-```mermaid
-graph LR
-    CLIENT[dim_client] -->|1:N| CHANNEL[dim_channel]
-    CLIENT -->|1:N| USER[dim_user]
-    CLIENT -->|1:N| FACT[fact_videos]
-    CHANNEL -->|1:N| FACT
-    USER -->|1:N| FACT
-    TYPE[dim_type] -->|1:N| FACT
-    PLATFORM[dim_platform] -->|1:N| FACT
+This is the most "Frammer-specific" dimension. Every video has an input type (what format it came in as) and an output type (what Frammer transformed it into).
+
+| Column | Type | What it is |
+|--------|------|------------|
+| `type_id` | int (PK) | Auto-incremented ID |
+| `input_type` | varchar(80) | Source format: Webinar, Podcast, Interview, Presentation, Meeting Recording, Tutorial, Lecture, Panel Discussion, Product Demo |
+| `output_type` | varchar(80) | Generated format: Short Clip, Highlights Reel, Chapter, Summary, Quote Card, Tutorial, Trailer |
+
+Not every input-output combination exists — the simulator creates ~31 realistic pairings. For example, you'll see "Podcast → Short Clip" but not "Meeting Recording → Trailer."
+
+The Publishing Funnel page has two charts that break down videos by input type (donut) and output type (horizontal bar), so this dimension is heavily used there.
+
+---
+
+## Platforms (`dim_platform`)
+
+Where published videos end up. This is the simplest dimension — just 5 rows.
+
+| Column | Type | What it is |
+|--------|------|------------|
+| `platform_id` | int (PK) | Auto-incremented ID |
+| `platform_name` | varchar(80) | Platform name, unique |
+
+**Platforms:** YouTube, Instagram, TikTok, LinkedIn, Twitter/X
+
+The `platform_id` in fact_videos is **nullable** — if a video hasn't been published yet, this is NULL. That's why you can have videos where `is_published = false` and `platform_id = NULL`.
+
+---
+
+## How They All Connect
+
+```
+dim_client ──┐
+dim_channel ─┤
+dim_user ────┼──▶ fact_videos (14K+ records)
+dim_type ────┤
+dim_platform ┘
 ```
 
-### Filter Scoping
-When a user selects a **Client** in the global filter bar, the **Channel** dropdown automatically scopes to only show channels belonging to that client. This is implemented client-side by filtering `filterOptions.channels` where `channel.client_id === selectedClientId`.
+Every row in `fact_videos` has a foreign key to each dimension (except `platform_id` which is nullable). The star schema means you can slice the data by any combination of dimensions — the global filter bar on the frontend does exactly this by passing `client_id`, `channel_id`, and `platform_id` as query params to every API endpoint.

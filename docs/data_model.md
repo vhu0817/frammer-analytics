@@ -1,17 +1,20 @@
-# Data Model — Star Schema
+# Data Model
 
-## Overview
+> How the database is structured and why we made the choices we did.
 
-Frammer Analytics uses a **star schema** — a denormalized relational design optimized for analytical queries. One central fact table (`fact_videos`) connects to 5 dimension tables via foreign keys.
+## Why a Star Schema?
 
-This design was chosen because:
-- **Fast aggregations** — no complex joins needed for most dashboard queries
-- **Simple to understand** — business users can reason about the schema
-- **Filter-friendly** — each dimension becomes a natural filter axis on the frontend
+We went with a classic star schema — one big fact table in the middle, surrounded by smaller dimension tables. It's the standard pattern for analytics databases and it made sense here because:
+
+1. **Most of our queries are aggregations.** Things like "how many videos did TechVista upload last week?" or "what's the processing rate for Short Clips?" These are `COUNT` / `SUM` / `GROUP BY` queries that work perfectly with a single denormalized fact table.
+
+2. **The dashboard needs to filter by any dimension.** The global filter bar lets users pick a client, channel, or platform and every chart updates. With a star schema, that's just adding a `WHERE client_id = ?` to every query — no complex joins required.
+
+3. **It's easy to explain.** When someone new looks at the schema, they immediately get it: "oh, there's a table of videos and a bunch of lookup tables for who/what/where."
 
 ---
 
-## Entity Relationship Diagram
+## ER Diagram
 
 ```mermaid
 erDiagram
@@ -78,69 +81,58 @@ erDiagram
 
 ---
 
-## Fact Table: `fact_videos`
+## The Fact Table (`fact_videos`)
 
-The central table tracking every video's journey through the pipeline.
+This is where all the action is. Every row represents one video that entered the Frammer pipeline. Currently holds ~14,000 records spanning 180 days.
 
-### Columns
+| Column | Type | Nullable? | What it tracks |
+|--------|------|-----------|----------------|
+| `video_id` | int | No (PK) | Unique video identifier |
+| `client_id` | int | No (FK) | Which company uploaded it |
+| `channel_id` | int | No (FK) | Which channel it belongs to |
+| `user_id` | int | No (FK) | Who uploaded it |
+| `type_id` | int | No (FK) | What kind of content transformation |
+| `platform_id` | int | **Yes** (FK) | Where it was published — NULL means unpublished |
+| `uploaded_at` | datetime | No | When it entered the system |
+| `processed_at` | datetime | **Yes** | When AI processing finished — NULL means unprocessed |
+| `published_at` | datetime | **Yes** | When it went live — NULL means unpublished |
+| `duration_seconds` | float | No | Length of the source video |
+| `is_processed` | bool | No | Quick flag: has processing completed? |
+| `is_published` | bool | No | Quick flag: has it been published? |
+| `title` | varchar(255) | **Yes** | Video title — intentionally NULL for ~5% of records (simulated data quality issue) |
 
-| Column | Type | Nullable | Description |
-|--------|------|----------|-------------|
-| `video_id` | INTEGER | No (PK) | Auto-incremented unique identifier |
-| `client_id` | INTEGER | No (FK) | Which client owns this video |
-| `channel_id` | INTEGER | No (FK) | Which channel this video belongs to |
-| `user_id` | INTEGER | No (FK) | Who uploaded this video |
-| `type_id` | INTEGER | No (FK) | Input/output content type combination |
-| `platform_id` | INTEGER | **Yes** (FK) | Where it was published (NULL if unpublished) |
-| `uploaded_at` | DATETIME | No | When the video was uploaded |
-| `processed_at` | DATETIME | **Yes** | When AI processing completed (NULL if unprocessed) |
-| `published_at` | DATETIME | **Yes** | When published to platform (NULL if unpublished) |
-| `duration_seconds` | FLOAT | No | Length of the source video in seconds |
-| `is_processed` | BOOLEAN | No | Redundant flag for fast filtering |
-| `is_published` | BOOLEAN | No | Redundant flag for fast filtering |
-| `title` | VARCHAR(255) | **Yes** | Optional video title (NULL for ~5% of records) |
+### About the boolean flags
 
-### Indexes
+You might look at `is_processed` and think "wait, can't you just check `processed_at IS NOT NULL`?" And you'd be right — they're redundant. But we keep them because:
 
-| Index Name | Columns | Purpose |
-|-----------|---------|---------|
-| `ix_fact_client_uploaded` | `client_id, uploaded_at` | Dashboard queries filtered by client + date |
+- **They're faster to filter on.** A boolean column comparison is cheaper than a NULL check on a datetime, especially when you're doing `COUNT(*) FILTER (WHERE is_processed)` across 14K rows.
+- **They make the queries more readable.** `WHERE is_published = true` is clearer than `WHERE published_at IS NOT NULL` when you're scanning through route code.
+- **The data simulator sets them consistently.** If `processed_at` is set, `is_processed` is always `true`. They never drift.
+
+In a production system with millions of rows, this kind of denormalization saves real query time.
+
+---
+
+## Indexes
+
+We added a few composite indexes to speed up the most common dashboard queries:
+
+| Index | Columns | Which queries it helps |
+|-------|---------|----------------------|
+| `ix_fact_client_uploaded` | `client_id, uploaded_at` | Anything filtered by client + date range (most dashboard queries) |
 | `ix_fact_channel_uploaded` | `channel_id, uploaded_at` | Trends page grouped by channel over time |
-| `ix_fact_status` | `is_processed, is_published` | Funnel queries filtering on status |
+| `ix_fact_status` | `is_processed, is_published` | Funnel stage counts |
 | `ix_fact_uploaded` | `uploaded_at` | Explorer page sorting by upload date |
 
-### Why Redundant Boolean Flags?
-
-`is_processed` and `is_published` are technically redundant — you can derive them from `processed_at IS NOT NULL` and `published_at IS NOT NULL`. But checking a boolean column is significantly faster than checking a timestamp for NULL across 14,000+ rows, especially in aggregation queries like:
-
-```sql
-SELECT COUNT(*) FILTER (WHERE is_processed) FROM fact_videos;
--- vs
-SELECT COUNT(*) FILTER (WHERE processed_at IS NOT NULL) FROM fact_videos;
-```
-
-The boolean version uses a simple integer comparison; the timestamp version requires NULL-checking a larger column type.
+These aren't measured with EXPLAIN ANALYZE yet (we should do that). They're based on the actual query patterns in our route handlers.
 
 ---
 
-## Data Volume
+## How Queries Work
 
-| Table | Approximate Rows | Growth Pattern |
-|-------|------------------|----------------|
-| `dim_client` | 8 | Static (added manually) |
-| `dim_channel` | 28 | Grows with clients |
-| `dim_user` | 44 | Grows with clients |
-| `dim_type` | 31 | Semi-static |
-| `dim_platform` | 5 | Semi-static |
-| `fact_videos` | ~14,000 | ~80/day average, 180-day range |
+### Tenant Isolation
 
----
-
-## Query Patterns
-
-### Scoped Query (Tenant Isolation)
-
-Every dashboard query starts with `scoped_query(db, user)` which applies role-based filtering:
+Every single dashboard query goes through `scoped_query()` first. This function looks at who's logged in and automatically adds a `WHERE` clause:
 
 ```python
 def scoped_query(db, user):
@@ -149,13 +141,16 @@ def scoped_query(db, user):
         q = q.filter(FactVideos.client_id == user.client_id)
     elif user.role == "user":
         q = q.filter(FactVideos.user_id == user.user_id)
-    return q  # website_admin gets unfiltered
+    return q  # website_admin gets everything
 ```
 
-### Common Aggregation Pattern
+This way, tenant isolation happens in one place. Individual route handlers never need to think about access control — they just call `scoped_query()` and stack on additional filters.
+
+### Single-Query Aggregation
+
+We try to avoid the N+1 pattern. Instead of making 4 separate `COUNT(*)` queries for the Executive Summary KPIs, we compute everything in one shot:
 
 ```python
-# Single-query aggregation (avoids N+1)
 row = q.with_entities(
     func.count(FactVideos.video_id).label("total"),
     func.count().filter(FactVideos.is_processed == True).label("processed"),
@@ -164,10 +159,13 @@ row = q.with_entities(
 ).one()
 ```
 
-### Time Series Grouping
+One database round trip, four metrics. The `func.count().filter(...)` syntax is SQLAlchemy's equivalent of PostgreSQL's `COUNT(*) FILTER (WHERE ...)`.
+
+### Time Series Bucketing
+
+For the Trends page, we group uploads into day/week/month buckets:
 
 ```python
-# Group by day/week/month
 if granularity == "day":
     bucket = cast(FactVideos.uploaded_at, Date)
 elif granularity == "week":
@@ -175,3 +173,20 @@ elif granularity == "week":
 elif granularity == "month":
     bucket = func.date_trunc("month", FactVideos.uploaded_at)
 ```
+
+The `date_trunc` function is PostgreSQL-specific. If we ever needed to support SQLite for testing, we'd need to swap this out.
+
+---
+
+## Data Volume
+
+| Table | Rows | How it grows |
+|-------|------|-------------|
+| dim_client | 8 | Manually — new clients are rare |
+| dim_channel | 28 | When clients add new content streams |
+| dim_user | 44 | When clients add new team members |
+| dim_type | 31 | Semi-static — new content types are rare |
+| dim_platform | 5 | Semi-static (maybe Threads someday?) |
+| fact_videos | ~14,000 | ~80/day on average, spread across all clients |
+
+The simulator generates data over a 180-day window with realistic patterns: weekday volume is higher than weekends, enterprise clients produce more content, and processing/publishing has intentional failure rates (~15% never processed, ~45% never published).
