@@ -7,6 +7,7 @@ import {
   Filter,
   Table2,
   Bot,
+  ShieldCheck,
   ChevronLeft,
   ChevronRight,
   Menu,
@@ -19,6 +20,7 @@ const NAV_ITEMS = [
   { id: "analysis",  label: "Analysis",  icon: BarChart3 },
   { id: "funnel",    label: "Funnel",    icon: Filter },
   { id: "explorer",  label: "Explorer",  icon: Table2 },
+  { id: "quality",   label: "Data Quality", icon: ShieldCheck },
 ];
 
 export default function Sidebar({ activeTab, onTabChange, onAtlasToggle, collapsed, onCollapsedChange }) {

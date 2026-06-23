@@ -106,8 +106,9 @@ export default function Analysis() {
     }
     setSelectedEntity(name);
     try {
+      const drillParams = useFilterStore.getState().toParams();
       const res = await api.get("/api/analysis/drilldown", {
-        params: { ...params, dimension, value: name },
+        params: { ...drillParams, dimension, value: name },
       });
       setDrilldown(res.data);
     } catch (err) {

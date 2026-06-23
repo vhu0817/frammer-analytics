@@ -9,6 +9,7 @@ import UsageTrends from "@/pages/UsageTrends";
 import Analysis from "@/pages/Analysis";
 import PublishingFunnel from "@/pages/PublishingFunnel";
 import VideoExplorer from "@/pages/VideoExplorer";
+import DataQuality from "@/pages/DataQuality";
 
 // wrapper that redirects to /login if there's no token
 function ProtectedRoute({ children }) {
@@ -34,6 +35,8 @@ function DashboardContent({ activeTab }) {
       return <ErrorBoundary key="funnel"><PublishingFunnel /></ErrorBoundary>;
     case "explorer":
       return <ErrorBoundary key="explorer"><VideoExplorer /></ErrorBoundary>;
+    case "quality":
+      return <ErrorBoundary key="quality"><DataQuality /></ErrorBoundary>;
     default:
       return <ErrorBoundary key="executive"><ExecutiveSummary /></ErrorBoundary>;
   }

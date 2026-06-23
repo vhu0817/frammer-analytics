@@ -185,7 +185,7 @@ export default function ExecutiveSummary() {
         ))}
       </div>
 
-      {/* bottom row: sparkline detail chart + donut chart + alerts */}
+      {/* bottom row: sparkline detail chart + donut chart */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         {/* 30-day trend chart — wider */}
         <motion.div {...fadeUp} transition={{ delay: 0.35 }} className="glass-card p-6 lg:col-span-2">
@@ -268,6 +268,7 @@ export default function ExecutiveSummary() {
                   paddingAngle={2}
                   dataKey="value"
                   stroke="none"
+                  activeShape={false}
                 >
                   {donutData.map((_, i) => (
                     <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
@@ -280,7 +281,11 @@ export default function ExecutiveSummary() {
                     borderRadius: "8px",
                     fontSize: "12px",
                     color: "oklch(0.95 0 0)",
+                    boxShadow: "0 8px 32px oklch(0 0 0 / 40%)",
                   }}
+                  wrapperStyle={{ outline: "none" }}
+                  itemStyle={{ color: "oklch(0.85 0 0)" }}
+                  cursor={false}
                   formatter={(value, name) => [`${value.toLocaleString()} (${donutData.find(d => d.name === name)?.pct}%)`, name]}
                 />
               </PieChart>

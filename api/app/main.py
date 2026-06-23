@@ -44,7 +44,7 @@ app.add_middleware(
 
 # each route module gets its own prefix — keeps the URL structure clean
 # and means individual route files don't need to worry about /api/whatever
-from app.routes import auth, executive, trends, analysis, funnel, explorer, filters, agent
+from app.routes import auth, executive, trends, analysis, funnel, explorer, filters, agent, data_quality
 
 app.include_router(auth.router,      prefix="/api/auth",      tags=["auth"])
 app.include_router(executive.router,  prefix="/api/executive",  tags=["executive"])
@@ -54,6 +54,7 @@ app.include_router(funnel.router,     prefix="/api/funnel",     tags=["funnel"])
 app.include_router(explorer.router,   prefix="/api/explorer",   tags=["explorer"])
 app.include_router(filters.router,    prefix="/api/filters",    tags=["filters"])
 app.include_router(agent.router,      prefix="/api/agent",      tags=["agent"])
+app.include_router(data_quality.router, prefix="/api/data-quality", tags=["data-quality"])
 
 
 @app.get("/health", tags=["health"])

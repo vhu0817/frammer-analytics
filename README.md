@@ -27,7 +27,7 @@ Frammer processes thousands of videos daily for multiple enterprise clients. Thi
 
 ## Current progress
 
-Building this step-by-step across 8 phases (47 total steps). **7 of 8 phases complete.**
+Building this step-by-step across 8 phases (47 total steps). **All 8 phases complete.**
 
 ### ✅ Phase 1 — Scaffolding & Infrastructure (Steps 1.1–1.10)
 - Monorepo folder structure (`api/`, `web/`, `docs/`)
@@ -98,11 +98,11 @@ The **ATLAS** (Analytics & Trends Language Agent System) is an AI-powered natura
 - **ChatMessage** — user/agent message bubbles with inline markdown rendering (bold, code, tables, lists, headers) — no react-markdown dependency
 - **AgentChart** — dynamic Recharts renderer that maps agent chart configs to bar, line, area, pie, donut, and radar charts
 
-### ⏳ Phase 8 — Polish & Documentation
-- Error boundaries, skeleton screens, toast notifications
-- Responsive design (768px → 1440px)
-- Data quality monitoring
-- Metric dictionary, dimension dictionary, ER diagram docs
+### ✅ Phase 8 — Polish & Documentation
+- Error boundaries per page, skeleton loading screens, global toast notification system
+- Responsive design: mobile hamburger drawer sidebar, progressive text hiding, wrapping filter bar
+- Data quality monitoring page: quality score ring, field completeness chart, missing values, unknown buckets, duplicate detection, FK integrity
+- Documentation: metric dictionary, dimension dictionary, data model ER diagram
 
 ## Getting started
 
@@ -207,11 +207,15 @@ frammer-analytics/
 │       │   ├── UsageTrends.jsx
 │       │   ├── Analysis.jsx
 │       │   ├── PublishingFunnel.jsx
-│       │   └── VideoExplorer.jsx
+│       │   ├── VideoExplorer.jsx
+│       │   └── DataQuality.jsx      # data governance dashboard
 │       ├── stores/          # Zustand (auth, filters, atlas)
 │       ├── lib/             # Axios client, utils
 │       └── App.jsx          # routing + tab switch
-├── docs/                    # documentation (phase 8)
+├── docs/
+│   ├── metric_dictionary.md     # all KPI definitions + formulas
+│   ├── dimension_dictionary.md  # all dimensions + hierarchies
+│   └── data_model.md            # star schema ER diagram
 ├── docker-compose.yml
 └── .env.example
 ```
