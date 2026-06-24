@@ -174,13 +174,16 @@ export default function PublishingFunnel() {
                   paddingAngle={2}
                   dataKey="value"
                   stroke="none"
+                  activeShape={false}
                 >
                   {typeMix.input_types.map((_, i) => (
                     <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
                   ))}
                 </Pie>
                 <Tooltip
+                  cursor={false}
                   contentStyle={tooltipStyle}
+                  itemStyle={{ color: "oklch(0.95 0 0)" }}
                   formatter={(value, name) => [
                     `${value.toLocaleString()} (${typeMix.input_types.find((t) => t.type === name)?.pct}%)`,
                     name,

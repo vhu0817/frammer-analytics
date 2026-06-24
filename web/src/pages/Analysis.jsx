@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
-  BarChart, Bar, ResponsiveContainer, Tooltip, XAxis, YAxis,
+  BarChart, Bar, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis,
   CartesianGrid, RadarChart, Radar, PolarGrid, PolarAngleAxis,
   PolarRadiusAxis,
 } from "recharts";
@@ -320,7 +320,7 @@ function LeaderboardChart({ leaderboard, dimension, metric }) {
             <Tooltip contentStyle={tooltipStyle} />
             <Bar dataKey="value" radius={[4, 4, 0, 0]} barSize={28}>
               {data.map((_, i) => (
-                <motion.rect key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
               ))}
             </Bar>
           </BarChart>
