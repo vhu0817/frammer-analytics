@@ -192,6 +192,8 @@ export default function DataQuality() {
                 />
                 <Tooltip
                   contentStyle={tooltipStyle}
+                  itemStyle={{ color: "oklch(0.95 0 0)" }}
+                  labelStyle={{ color: "oklch(0.95 0 0)" }}
                   formatter={(val, name, props) => [
                     `${val}% (${props.payload.complete.toLocaleString()}/${props.payload.total.toLocaleString()})`,
                     "Complete"
