@@ -142,6 +142,8 @@ export default function PublishingFunnel() {
                 />
                 <Tooltip
                   contentStyle={tooltipStyle}
+                  itemStyle={{ color: "oklch(0.95 0 0)" }}
+                  labelStyle={{ color: "oklch(0.95 0 0)" }}
                   formatter={(v) => `${v}%`}
                 />
                 <Legend
@@ -184,6 +186,7 @@ export default function PublishingFunnel() {
                   cursor={false}
                   contentStyle={tooltipStyle}
                   itemStyle={{ color: "oklch(0.95 0 0)" }}
+                  labelStyle={{ color: "oklch(0.95 0 0)" }}
                   formatter={(value, name) => [
                     `${value.toLocaleString()} (${typeMix.input_types.find((t) => t.type === name)?.pct}%)`,
                     name,
@@ -239,6 +242,8 @@ export default function PublishingFunnel() {
               />
               <Tooltip
                 contentStyle={tooltipStyle}
+                itemStyle={{ color: "oklch(0.95 0 0)" }}
+                labelStyle={{ color: "oklch(0.95 0 0)" }}
                 formatter={(v, name, props) => [
                   `${v.toLocaleString()} (${props.payload.pct}%)`,
                   "Count",
